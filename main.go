@@ -13,7 +13,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 	pages := []string{
 		"./templates/base.html",
-		"./templates/index.html",
+		"./templates/schedule.html",
 	}
 
 	templateSet, err := template.ParseFiles(pages...)
@@ -45,6 +45,7 @@ func main() {
 	// Route Declarations
 	mux.HandleFunc("GET /", home)
 	mux.HandleFunc("POST /create", createPost)
+	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("templates/static"))))
 
 	// Start server at http://localhost:4444
 	log.Print("Starting Server on port 4444")

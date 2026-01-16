@@ -1,18 +1,19 @@
 {{define "base"}}
 <!doctype html>
 <html lang='en'>
-    <head>
-        <meta charset='utf-8'>
-        <title>Shift Scheduler - {{template "title" .}}</title>
-    </head>
-    <body>
-        <header>
-            <h1><a href='/'>Shift Scheduler</a></h1>
-        </header>
-        <main>
-            {{template "main" .}}
-        </main>
-        <footer>Source code found <a href='https://github.com/SimicNinja/OIT-Shift-Scheduler'>here</a></footer>
-    </body>
+	<head>
+		<meta charset='utf-8'>
+		<title>Shift Scheduler - {{template "title" .}}</title>
+		<link rel="stylesheet" href="/static/style.css">
+	</head>
+	<body>
+		<header>
+			<h1><a href='/'>Shift Scheduler</a></h1>
+		</header>
+		<main>
+			{{template "main" .}}
+		</main>
+		<footer>Source code found <a href='https://github.com/SimicNinja/OIT-Shift-Scheduler'>here</a></footer>
+	</body>
 </html>
 {{end}}
