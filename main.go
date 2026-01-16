@@ -9,8 +9,6 @@ import (
 
 // Home Route/Handler
 func home(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Server", "Go")
-
 	pages := []string{
 		"./templates/base.html",
 		"./templates/schedule.html",
