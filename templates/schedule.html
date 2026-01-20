@@ -11,8 +11,15 @@
 			<th>Thursday</th>
 			<th>Friday</th>
 		</tr>
-		<tr>
-			<td>8:00 am</td>
-		</tr>
+		{{range .}}
+			<tr>
+				<td>{{.}}</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		{{end}}
 	</table>
 {{end}}
