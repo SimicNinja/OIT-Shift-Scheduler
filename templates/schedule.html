@@ -14,7 +14,9 @@
 			<tr>
 				<td>{{.}}</td>
 				{{range $.Hours}}
-					<td class = "timeSlot" day = "{{$day}}" hour = "{{.}}"></td>
+					<td class = "timeSlot" day = "{{$day}}" hour = "{{.}}">
+						<div ></div>
+					</td>
 				{{end}}
 			</tr>
 		{{end}}

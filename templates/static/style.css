@@ -1,4 +1,4 @@
-td
-{
-    border: black;
+.timeSlot.selected {
+  background-color: navy;
+  cursor: pointer;
 }
