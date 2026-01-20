@@ -7,6 +7,11 @@ import (
 	"net/http"
 )
 
+type WeekData struct {
+	Days  []string
+	Hours []int
+}
+
 // Home Route/Handler
 func home(w http.ResponseWriter, r *http.Request) {
 	pages := []string{
@@ -15,7 +20,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	templateSet, err := template.ParseFiles(pages...)
-	hours := []string{"8:00", "9:00", "10:00", "11:00", "12:00", "1:00", "2:00", "3:00", "4:00", "5:00", "6:00"}
+	data := WeekData{
+		Days:  []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"},
+		Hours: []int{8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6},
+	}
 
 	if err != nil {
 		log.Print(err.Error())
@@ -23,7 +31,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = templateSet.ExecuteTemplate(w, "base", hours)
+	err = templateSet.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
