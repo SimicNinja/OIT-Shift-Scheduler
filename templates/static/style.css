@@ -1,15 +1,14 @@
-.timeSlot.selected {
+.minuteSlot.selected {
   background-color: navy;
-  cursor: pointer;
 }
 
 table {
   width: 90%;
+  border-collapse: collapse;
 }
 
 table, td, th {
   border: 2px solid gray;
-  border-collapse: collapse;
 }
 
 #dayColumn {
@@ -20,10 +19,16 @@ table, td, th {
   width: 8.5%;
 }
 
-.timeSlot {
-  background-color: gray;
+.minuteSlot {
+  color: white;
+  text-align: end;
+  user-select: none;
+  background-color: #454545;
+  flex: 1;
+  padding-right: 2%;
 }
 
-td {
-  flex-direction: column;
+.hourSlot {
+  display: flex;
+  padding: 0;
 }

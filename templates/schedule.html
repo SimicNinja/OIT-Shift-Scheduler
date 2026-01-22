@@ -14,13 +14,17 @@
 		{{range .Days}}
 			{{$day := .}}
 			<tr>
-				<td>{{.}}</td>
+				<td class = "daySlot">{{.}}</td>
 				{{range $.Hours}}
 					{{$hour := .}}
 					<td>
+						<div class = "hourSlot">
 						{{range $.Minutes}}
-							<div class = "timeSlot" day = "{{$day}}" hour = "{{$hour}}" minute = "{{.}}">.</div>
+							<div class = "minuteSlot" day = "{{$day}}" hour = "{{$hour}}" minute = "{{.}}">
+								{{printf ":%02d" .}}
+							</div>
 						{{end}}
+						</div>
 					</td>
 				{{end}}
 			</tr>

@@ -17,7 +17,7 @@ selectBtn.addEventListener('click', function() {
 })
 
 document.addEventListener("mousedown", e => {
-	if(e.target.classList.contains("timeSlot"))
+	if(e.target.classList.contains("minuteSlot"))
 	{
 		isDragging = true;
 		toggleCell(e.target);
@@ -29,7 +29,7 @@ document.addEventListener("mouseup", e => {
 });
 
 document.addEventListener("mouseover", e => {
-	if (isDragging && e.target.classList.contains("timeSlot")) {
+	if (isDragging && e.target.classList.contains("minuteSlot")) {
 		toggleCell(e.target);
 	}
 });
