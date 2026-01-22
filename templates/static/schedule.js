@@ -37,11 +37,16 @@ document.addEventListener("mousedown", e => {
 document.addEventListener("mouseup", e => {
 	isDragging = false;
 
+	let weeklyMinuteCount = 0;
 	for(let i = 0; i < displayedTotals.length; i++)
 	{
 		let minuteCount = dailyTotals[i];
 		displayedTotals[i].textContent = getHours(minuteCount).toString() + "hrs " + getMinutes(minuteCount).toString() + "mins";
+
+		weeklyMinuteCount += minuteCount;
 	}
+
+	document.getElementById("weekTotal").textContent = "Weekly Total: " + getHours(weeklyMinuteCount).toString() + "hrs " + getMinutes(weeklyMinuteCount).toString() + "mins";
 });
 
 document.addEventListener("mouseover", e => {
