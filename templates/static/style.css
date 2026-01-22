@@ -2,3 +2,13 @@
   background-color: navy;
   cursor: pointer;
 }
+
+.timeSlot {
+  width: 9%;
+  font-size: 2em;
+}
+
+table, td, th {
+  border: 2px solid gray;
+  border-collapse: collapse;
+}

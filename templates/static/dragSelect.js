@@ -1,5 +1,20 @@
 let isDragging = false;
+let isSelecting = true;
 let selectedCells = [];
+const selectBtn = document.getElementById("selectBtn");
+
+selectBtn.addEventListener('click', function() {
+	if(selectBtn.textContent === "Select Mode")
+	{
+		isSelecting = false;
+		selectBtn.textContent = "Deselect Mode";
+	}
+	else if(selectBtn.textContent === "Deselect Mode")
+	{
+		isSelecting = true;
+		selectBtn.textContent = "Select Mode";
+	}
+})
 
 document.addEventListener("mousedown", e => {
 	if(e.target.classList.contains("timeSlot"))
@@ -19,16 +34,16 @@ document.addEventListener("mouseover", e => {
 	}
 });
 
-// Toggles selected 
-function toggleCell(cell) {
-	cell.classList.toggle("selected");
-
-	if(cell.classList.contains("selected"))
-	{
+function toggleCell(cell)
+{
+	if(isSelecting)
+	{	
+		cell.classList.add("selected");
 		selectedCells.push(cell);
 	}
 	else
 	{
+		cell.classList.remove("selected");
 		selectedCells = selectedCells.filter(c => c !== cell);
 	}
 }

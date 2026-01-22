@@ -2,6 +2,8 @@
 
 {{define "main"}}
 	<h2>The Schedule</h2>
+	<button id = "selectBtn">Select Mode</button>
+	
 	<table class = "week">
 		<tr>
 			<th>Day</th>
@@ -15,7 +17,7 @@
 				<td>{{.}}</td>
 				{{range $.Hours}}
 					<td class = "timeSlot" day = "{{$day}}" hour = "{{.}}">
-						<div ></div>
+						<div></div>
 					</td>
 				{{end}}
 			</tr>
