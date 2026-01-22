@@ -6,9 +6,9 @@
 	
 	<table class = "week">
 		<tr>
-			<th>Day</th>
+			<th id = "dayColumn">Day</th>
 			{{range .Hours}}
-				<th>{{.}}</th>
+				<th class = "hourColumn">{{.}}</th>
 			{{end}}
 		</tr>
 		{{range .Days}}
@@ -16,8 +16,11 @@
 			<tr>
 				<td>{{.}}</td>
 				{{range $.Hours}}
-					<td class = "timeSlot" day = "{{$day}}" hour = "{{.}}">
-						<div></div>
+					{{$hour := .}}
+					<td>
+						{{range $.Minutes}}
+							<div class = "timeSlot" day = "{{$day}}" hour = "{{$hour}}" minute = "{{.}}">.</div>
+						{{end}}
 					</td>
 				{{end}}
 			</tr>

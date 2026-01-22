@@ -3,12 +3,27 @@
   cursor: pointer;
 }
 
-.timeSlot {
-  width: 9%;
-  font-size: 2em;
+table {
+  width: 90%;
 }
 
 table, td, th {
   border: 2px solid gray;
   border-collapse: collapse;
+}
+
+#dayColumn {
+  width: 6.5%;
+}
+
+.hourColumn {
+  width: 8.5%;
+}
+
+.timeSlot {
+  background-color: gray;
+}
+
+td {
+  flex-direction: column;
 }
