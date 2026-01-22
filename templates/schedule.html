@@ -1,7 +1,9 @@
 {{define "title"}}Home{{end}}
 
 {{define "main"}}
-	<h2>The Schedule</h2>
+	<h1>Select Your Desired Schedule</h1>
+
+
 	<button id = "selectBtn">Select Mode</button>
 	
 	<table class = "week">
@@ -10,6 +12,7 @@
 			{{range .Hours}}
 				<th class = "hourColumn">{{.}}</th>
 			{{end}}
+			<th>Totals</th>
 		</tr>
 		{{range .Days}}
 			{{$day := .}}
@@ -27,7 +30,9 @@
 						</div>
 					</td>
 				{{end}}
+				<td class = "dailyTotal"> </td>
 			</tr>
 		{{end}}
 	</table>
+	<h2 id = "weekTotal">Weekly Total: </h2>
 {{end}}
