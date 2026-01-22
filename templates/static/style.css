@@ -3,7 +3,7 @@
 }
 
 table {
-  width: 90%;
+  width: 95%;
   border-collapse: collapse;
 }
 
@@ -12,11 +12,15 @@ table, td, th {
 }
 
 #dayColumn {
-  width: 6.5%;
+  width: 5%;
+}
+
+#totalColumn {
+  width: 5%;
 }
 
 .hourColumn {
-  width: 8.5%;
+  width: 9%;
 }
 
 .minuteSlot {

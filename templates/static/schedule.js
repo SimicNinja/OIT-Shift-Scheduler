@@ -1,8 +1,15 @@
 let isDragging = false;
 let isSelecting = true;
 let selectedCells = [];
-const dailyTotals = new Map([["Monday", 0], ["Tuesday", 0], ["Wednesday", 0], ["Thursday", 0], ["Friday", 0]]); // Count of 10 minute increments
 const selectBtn = document.getElementById("selectBtn");
+const dailyTotals = [0, 0, 0, 0, 0]; // Count of 10 minute increments; [Monday, Tuesday, Wednesday, Thursday, Friday]
+const displayedTotals = [
+	document.getElementById("MondayTotal"),
+	document.getElementById("TuesdayTotal"),
+	document.getElementById("WednesdayTotal"),
+	document.getElementById("ThursdayTotal"),
+	document.getElementById("FridayTotal")
+];
 
 // Button lister to toggle between Select & Deselect mode
 selectBtn.addEventListener('click', function() {
@@ -29,6 +36,12 @@ document.addEventListener("mousedown", e => {
 
 document.addEventListener("mouseup", e => {
 	isDragging = false;
+
+	for(let i = 0; i < displayedTotals.length; i++)
+	{
+		let minuteCount = dailyTotals[i];
+		displayedTotals[i].textContent = getHours(minuteCount).toString() + "hrs " + getMinutes(minuteCount).toString() + "mins";
+	}
 });
 
 document.addEventListener("mouseover", e => {
@@ -63,19 +76,19 @@ function addToTotals(cell)
 		switch(cell.attributes.day.value)
 		{
 			case "Monday":
-				dailyTotals.set("Monday", dailyTotals.get("Monday") + 1);
+				dailyTotals[0]++;
 				break;
 			case "Tuesday":
-				dailyTotals.set("Tuesday", dailyTotals.get("Tuesday") + 1);
+				dailyTotals[1]++;
 				break;
 			case "Wednesday":
-				dailyTotals.set("Wednesday", dailyTotals.get("Wednesday") + 1);
+				dailyTotals[2]++;
 				break;
 			case "Thursday":
-				dailyTotals.set("Thursday", dailyTotals.get("Thursday") + 1);
+				dailyTotals[3]++;
 				break;
 			case "Friday":
-				dailyTotals.set("Friday", dailyTotals.get("Friday") + 1);
+				dailyTotals[4]++;
 				break;
 		}
 	}
@@ -89,20 +102,30 @@ function removeFromTotals(cell)
 		switch(cell.attributes.day.value)
 		{
 			case "Monday":
-				dailyTotals.set("Monday", dailyTotals.get("Monday") - 1);
+				dailyTotals[0]--;
 				break;
 			case "Tuesday":
-				dailyTotals.set("Tuesday", dailyTotals.get("Tuesday") - 1);
+				dailyTotals[1]--;
 				break;
 			case "Wednesday":
-				dailyTotals.set("Wednesday", dailyTotals.get("Wednesday") - 1);
+				dailyTotals[2]--;
 				break;
 			case "Thursday":
-				dailyTotals.set("Thursday", dailyTotals.get("Thursday") - 1);
+				dailyTotals[3]--;
 				break;
 			case "Friday":
-				dailyTotals.set("Friday", dailyTotals.get("Friday") - 1);
+				dailyTotals[4]--;
 				break;
 		}
 	}
+}
+
+function getHours(minuteCount)
+{
+	return Math.trunc(minuteCount / 6);
+}
+
+function getMinutes(minuteCount)
+{
+		return (minuteCount % 6) * 10;
 }

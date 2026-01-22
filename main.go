@@ -23,7 +23,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	templateSet, err := template.ParseFiles(pages...)
 	data := WeekData{
 		Days:    []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"},
-		Hours:   []int{8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6},
+		Hours:   []int{8, 9, 10, 11, 12, 1, 2, 3, 4, 5},
 		Minutes: []int{0, 10, 20, 30, 40, 50},
 	}
 

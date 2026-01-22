@@ -12,7 +12,7 @@
 			{{range .Hours}}
 				<th class = "hourColumn">{{.}}</th>
 			{{end}}
-			<th>Totals</th>
+			<th id = "totalColumn">Totals</th>
 		</tr>
 		{{range .Days}}
 			{{$day := .}}
@@ -30,7 +30,7 @@
 						</div>
 					</td>
 				{{end}}
-				<td class = "dailyTotal"> </td>
+				<td id = "{{.}}Total">0hrs 0mins</td>
 			</tr>
 		{{end}}
 	</table>
