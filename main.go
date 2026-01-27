@@ -34,7 +34,23 @@ type ScheduleWrapper struct {
 	Schedule Schedule `json:"Schedule`
 }
 
-// Home Route/Handler
+func main() {
+	// Servemux is the same as a React Browser Router
+	mux := http.NewServeMux()
+	fileServer := http.FileServer(http.Dir("./templates/static/"))
+
+	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
+
+	// Route Declarations
+	mux.HandleFunc("GET /", home)
+	mux.HandleFunc("POST /submit", submitSchedule)
+
+	// Start server at http://localhost:4444
+	log.Print("Starting Server on port 4444")
+	serverError := http.ListenAndServe(":4444", mux)
+	log.Fatal(serverError)
+}
+
 func home(w http.ResponseWriter, r *http.Request) {
 	pages := []string{
 		"./templates/base.html",
@@ -73,23 +89,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func main() {
-	// Servemux is the same as a React Browser Router
-	mux := http.NewServeMux()
-	fileServer := http.FileServer(http.Dir("./templates/static/"))
-
-	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
-
-	// Route Declarations
-	mux.HandleFunc("GET /", home)
-	mux.HandleFunc("POST /submit", submitSchedule)
-
-	// Start server at http://localhost:4444
-	log.Print("Starting Server on port 4444")
-	serverError := http.ListenAndServe(":4444", mux)
-	log.Fatal(serverError)
-}
-
 func submitSchedule(w http.ResponseWriter, r *http.Request) {
 	var wrapper ScheduleWrapper
 
@@ -101,4 +100,36 @@ func submitSchedule(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("Decoded schedule: %+v\n", wrapper.Schedule)
+
+	schedule := wrapper.Schedule
+	dailyCount := map[string]int{"Monday": 0, "Tuesday": 0, "Wednesday": 0, "Thursday": 0, "Friday": 0}
+	weeklyCount := 0
+
+	for _, shift := range schedule.Shifts {
+		if shift.Minutes < 180 {
+			fmt.Fprintf(w, "Denied! One of your shifts on %s is less than 3 hours long. Fix %s's schedule and resubmit.", shift.Day, shift.Day)
+			return
+		}
+
+		dailyCount[shift.Day] += shift.Minutes
+	}
+
+	for day, dailyTotal := range dailyCount {
+		if dailyTotal > 540 {
+			fmt.Fprintf(w, "Denied! You cannot work than 9 hours. Fix %s's schedule and resubmit.", day)
+			return
+		}
+
+		weeklyCount += dailyTotal
+	}
+
+	if weeklyCount < 1200 {
+		fmt.Fprintf(w, "Denied! You must work at least 20 hours a week. Fix your schedule and resubmit.")
+		return
+	} else if weeklyCount > 2400 {
+		fmt.Fprintf(w, "Denied! You cannot work more than 40 in a week. Fix your schedule and resubmit.")
+		return
+	} else {
+		fmt.Fprintf(w, "Accepted! You schedule has been sent to your manager for review and approval.")
+	}
 }
