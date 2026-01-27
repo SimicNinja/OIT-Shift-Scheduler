@@ -55,6 +55,24 @@ document.addEventListener("mouseover", e => {
 	}
 });
 
+// Visual Toggle of Element & Manage selectedCells list
+function toggleCell(cell)
+{
+	if(isSelecting && !cell.classList.contains("selected"))
+	{	
+		cell.classList.add("selected");
+		selectedCells.push(cell);
+		addToTotals(cell);
+	}
+	else if(!isSelecting && cell.classList.contains("selected"))
+	{
+		cell.classList.remove("selected");
+		selectedCells = selectedCells.filter(c => c !== cell);
+		removeFromTotals(cell);
+	}
+}
+
+// Parses through selectedCells to create list of shifts to send to server.
 function buildSchedulePayload()
 {
 	const shifts = [];
@@ -98,10 +116,7 @@ function buildSchedulePayload()
 	return {Shifts: shifts};
 }
 
-document.body.addEventListener("htmx:configRequest", e => {
-  console.log("htmx:configRequest fired", e.detail);
-});
-
+// Helper Function for buildSchedulePayload that aggregates selected timeSlot cells that are continuous.
 function makeShift(day, startMinutes, endMinutes)
 {
 	const startHour = Math.floor(startMinutes /60);
@@ -117,23 +132,6 @@ function makeShift(day, startMinutes, endMinutes)
 		End: `${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`,
 		Minutes: minutes
   	};
-}
-
-// Visual Toggle of Element
-function toggleCell(cell)
-{
-	if(isSelecting)
-	{	
-		cell.classList.add("selected");
-		selectedCells.push(cell);
-		addToTotals(cell);
-	}
-	else
-	{
-		cell.classList.remove("selected");
-		selectedCells = selectedCells.filter(c => c !== cell);
-		removeFromTotals(cell);
-	}
 }
 
 // Daily & Weekly Total Calculation and update

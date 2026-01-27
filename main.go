@@ -30,6 +30,10 @@ type Schedule struct {
 	Shifts []Shift `json:"Shifts"`
 }
 
+type ScheduleWrapper struct {
+	Schedule Schedule `json:"Schedule`
+}
+
 // Home Route/Handler
 func home(w http.ResponseWriter, r *http.Request) {
 	pages := []string{
@@ -69,13 +73,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func createPost(w http.ResponseWriter, r *http.Request) {
-	// Set HTTP Status code
-	w.WriteHeader(201)
-
-	w.Write([]byte("Save a new object..."))
-}
-
 func main() {
 	// Servemux is the same as a React Browser Router
 	mux := http.NewServeMux()
@@ -85,7 +82,6 @@ func main() {
 
 	// Route Declarations
 	mux.HandleFunc("GET /", home)
-	mux.HandleFunc("POST /create", createPost)
 	mux.HandleFunc("POST /submit", submitSchedule)
 
 	// Start server at http://localhost:4444
@@ -95,14 +91,14 @@ func main() {
 }
 
 func submitSchedule(w http.ResponseWriter, r *http.Request) {
-	var schedule Schedule
+	var wrapper ScheduleWrapper
 
-	err := json.NewDecoder(r.Body).Decode(&schedule)
+	err := json.NewDecoder(r.Body).Decode(&wrapper)
 	if err != nil {
 		fmt.Println("Decode error:", err)
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
 
-	fmt.Printf("Decoded schedule: %+v\n", schedule)
+	fmt.Printf("Decoded schedule: %+v\n", wrapper.Schedule)
 }
