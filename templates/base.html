@@ -10,8 +10,10 @@
 		<main>
 			{{template "main" .}}
 		</main>
+		<br>
 		<footer>Source code found <a href='https://github.com/SimicNinja/OIT-Shift-Scheduler'>here</a></footer>
-		<script src = "/static/schedule.js"></script>
+
+		{{template "script" .}}
 		<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 		<script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
 	</body>

@@ -42,7 +42,8 @@ func main() {
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
 	// Route Declarations
-	mux.HandleFunc("GET /", home)
+	mux.HandleFunc("GET /", login)
+	mux.HandleFunc("GET /schedule", schedule)
 	mux.HandleFunc("POST /submit", submitSchedule)
 
 	// Start server at http://localhost:4444
@@ -51,7 +52,29 @@ func main() {
 	log.Fatal(serverError)
 }
 
-func home(w http.ResponseWriter, r *http.Request) {
+func login(w http.ResponseWriter, r *http.Request) {
+	pages := []string{
+		"./templates/base.html",
+		"./templates/login.html",
+	}
+
+	templateSet, err := template.ParseFiles(pages...)
+
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	err = templateSet.ExecuteTemplate(w, "base", nil)
+
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
+func schedule(w http.ResponseWriter, r *http.Request) {
 	pages := []string{
 		"./templates/base.html",
 		"./templates/schedule.html",
@@ -76,12 +99,13 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		log.Print(err.Error())
+		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	err = templateSet.ExecuteTemplate(w, "base", data)
+
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
