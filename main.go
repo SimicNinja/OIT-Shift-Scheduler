@@ -34,6 +34,9 @@ type ScheduleWrapper struct {
 	Schedule Schedule `json:"Schedule`
 }
 
+// User Database Mock
+var users = map[string]string{"student1": "BYUStudent", "admin1": "JoeBelnap"}
+
 func main() {
 	// Servemux is the same as a React Browser Router
 	mux := http.NewServeMux()
@@ -43,6 +46,7 @@ func main() {
 
 	// Route Declarations
 	mux.HandleFunc("GET /", login)
+	mux.HandleFunc("POST /login", login)
 	mux.HandleFunc("GET /schedule", schedule)
 	mux.HandleFunc("POST /submit", submitSchedule)
 
@@ -53,24 +57,42 @@ func main() {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	pages := []string{
-		"./templates/base.html",
-		"./templates/login.html",
+	if r.Method == "GET" {
+		pages := []string{
+			"./templates/base.html",
+			"./templates/login.html",
+		}
+
+		templateSet, err := template.ParseFiles(pages...)
+
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		err = templateSet.ExecuteTemplate(w, "base", nil)
+
+		if err != nil {
+			log.Print(err.Error())
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
 	}
 
-	templateSet, err := template.ParseFiles(pages...)
+	if r.Method == "POST" {
+		username := r.FormValue("username")
+		password := r.FormValue("password")
 
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
+		secret, ok := users[username]
 
-	err = templateSet.ExecuteTemplate(w, "base", nil)
-
-	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		if !ok {
+			fmt.Fprintf(w, "Denied! User: %s does not exist.", username)
+		} else if secret != password {
+			fmt.Fprintf(w, "Denied! You have entered the wrong password for user: %s.", username)
+		} else {
+			w.Header().Set("HX-Redirect", "/schedule")
+			w.WriteHeader(http.StatusOK)
+		}
 	}
 }
 

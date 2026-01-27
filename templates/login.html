@@ -3,7 +3,7 @@
 {{define "main"}}
     <h1>Login Page</h1>
 
-    <form hx-post = "login" hx-target = "#errMsg" hx-swap = "outerHTML">
+    <form hx-post = "/login" hx-target = "#errMsg" hx-swap = "outerHTML">
         <div>
             <label for = "username">Username:</label>
             <input type = "text" id = "username" name = "username" required>
@@ -12,7 +12,7 @@
             <label for = "password">Password:</label>
             <input type = "password" id = "password" name = "password" required>
         </div>
-        <button type = "submit">Log In</button>
+        <input type = "submit"/>
     </form>
 
     <div id = "errMsg"></div>
