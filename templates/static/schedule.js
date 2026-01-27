@@ -12,7 +12,7 @@ const displayedTotals = [
 ];
 
 // Button lister to toggle between Select & Deselect mode
-selectBtn.addEventListener('click', function() {
+selectBtn.addEventListener('click', e => {
 	if(selectBtn.textContent === "Select Mode")
 	{
 		isSelecting = false;
@@ -54,6 +54,70 @@ document.addEventListener("mouseover", e => {
 		toggleCell(e.target);
 	}
 });
+
+function buildSchedulePayload()
+{
+	const shifts = [];
+
+	const cellsByDay = {};
+	selectedCells.forEach(cell =>
+	{
+		const day = cell.getAttribute("day");
+		const hour = parseInt(cell.getAttribute("hour"));
+		const minute = parseInt(cell.getAttribute("minute"));
+		const time = hour * 60 + minute; // minutes since midnight
+
+		if (!cellsByDay[day]) cellsByDay[day] = [];
+		cellsByDay[day].push(time);
+	});
+
+	// For each day, sort and merge into shifts
+	Object.keys(cellsByDay).forEach(day =>
+	{
+		const times = cellsByDay[day].sort((a, b) => a - b);
+
+		let start = times[0];
+		let prev = times[0];
+
+		for (let i = 1; i < times.length; i++)
+		{
+			if (times[i] !== prev + 10)
+			{
+				// break in continuity → close current shift
+				shifts.push(makeShift(day, start, prev));
+				start = times[i];
+			}
+
+			prev = times[i];	
+		}
+
+		// close last shift
+		shifts.push(makeShift(day, start, prev));
+	});
+
+	return {Shifts: shifts};
+}
+
+document.body.addEventListener("htmx:configRequest", e => {
+  console.log("htmx:configRequest fired", e.detail);
+});
+
+function makeShift(day, startMinutes, endMinutes)
+{
+	const startHour = Math.floor(startMinutes /60);
+	const startMin = startMinutes % 60;
+	const endHour = Math.floor((endMinutes + 10) / 60);
+	const endMin = (endMinutes + 10) % 60;
+
+	const minutes = endMinutes - startMinutes + 10;
+
+	return {
+		Day: day,
+		Start: `${String(startHour).padStart(2, "0")}:${String(startMin).padStart(2, "0")}`,
+		End: `${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`,
+		Minutes: minutes
+  	};
+}
 
 // Visual Toggle of Element
 function toggleCell(cell)

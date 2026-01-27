@@ -10,7 +10,7 @@
 		<tr>
 			<th id = "dayColumn">Day</th>
 			{{range .Hours}}
-				<th class = "hourColumn">{{.}}</th>
+				<th class = "hourColumn">{{.Label}}</th>
 			{{end}}
 			<th id = "totalColumn">Totals</th>
 		</tr>
@@ -19,7 +19,7 @@
 			<tr>
 				<td class = "daySlot">{{.}}</td>
 				{{range $.Hours}}
-					{{$hour := .}}
+					{{$hour := .Value24}}
 					<td>
 						<div class = "hourSlot">
 						{{range $.Minutes}}
@@ -34,5 +34,17 @@
 			</tr>
 		{{end}}
 	</table>
+
 	<h2 id = "weekTotal">Weekly Total: </h2>
+	
+	<button 
+		hx-post = "/submit" 
+		hx-trigger = "click" 
+		hx-target = "#submitStatus"
+		hx-ext = "json-enc"
+		hx-vals = "js:buildSchedulePayload()">
+		Submit Schedule
+	</button>
+
+	<div id = "submitStatus"></div>
 {{end}}
