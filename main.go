@@ -31,11 +31,18 @@ type Schedule struct {
 }
 
 type ScheduleWrapper struct {
-	Schedule Schedule `json:"Schedule`
+	Schedule Schedule `json:"Schedule"`
+}
+
+type userInfo struct {
+	Username    string
+	Password    string
+	AdminStatus bool
+	Schedule    *Schedule
 }
 
 // User Database Mock
-var users = map[string]string{"student1": "BYUStudent", "admin1": "JoeBelnap"}
+var users = map[string]userInfo{"student1": {"student1", "BYUStudent", false, nil}, "admin1": {"admin1", "JoeBelnap", true, nil}}
 
 func main() {
 	// Servemux is the same as a React Browser Router
@@ -83,12 +90,12 @@ func login(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 
-		secret, ok := users[username]
+		userInfo, ok := users[username]
 
 		if !ok {
 			fmt.Fprintf(w, "Denied! User: %s does not exist.", username)
-		} else if secret != password {
-			fmt.Fprintf (w, "Denied! You have entered the wrong password for user: %s.", username)
+		} else if userInfo.Password != password {
+			fmt.Fprintf(w, "Denied! You have entered the wrong password for user: %s.", username)
 		} else {
 			w.Header().Set("HX-Redirect", "/schedule")
 			w.WriteHeader(http.StatusOK)
