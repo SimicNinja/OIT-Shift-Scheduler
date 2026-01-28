@@ -184,6 +184,6 @@ func submitSchedule(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		w.Header().Set("HX-Trigger", "pending-approval")
-		fmt.Fprintf(w, "Pending Approval! You schedule has been sent to your manager for review and approval.")
+		fmt.Fprintf(w, "Pending Approval! You schedule has been sent to your manager for review and approval. You will not be able to make edits until your request is approved or denied.")
 	}
 }

@@ -77,6 +77,8 @@ document.body.addEventListener("pending-approval", e => {
 	const btn = document.getElementById("submitBtn");
 	btn.disabled = true;
 	btn.textContent = "Submitted";
+
+	document.querySelector(".week").style.pointerEvents = "none";
 })
 
 // Parses through selectedCells to create list of shifts to send to server.
