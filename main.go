@@ -44,7 +44,7 @@ type userInfo struct {
 }
 
 // User Database Mock
-var users = map[string]userInfo{"student1": {"student1", "BYUStudent", false, nil}, "admin1": {"admin1", "JoeBelnap", true, nil}}
+var users = map[string]*userInfo{"student1": {"student1", "BYUStudent", false, nil}, "admin1": {"admin1", "JoeBelnap", true, nil}}
 
 // Tracks/maps browser sessions to users.
 var sessions = map[string]*userInfo{}
@@ -61,6 +61,7 @@ func main() {
 	mux.HandleFunc("POST /login", login)
 	mux.HandleFunc("GET /schedule", schedule)
 	mux.HandleFunc("POST /submit", submitSchedule)
+	mux.HandleFunc("GET /approval", approval)
 
 	// Start server at http://localhost:4444
 	log.Print("Starting Server on port 4444")
@@ -95,16 +96,16 @@ func login(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 
-		userInfo, ok := users[username]
+		userPtr, ok := users[username]
 
 		if !ok {
 			fmt.Fprintf(w, "Denied! User: %s does not exist.", username)
-		} else if userInfo.Password != password {
+		} else if userPtr.Password != password {
 			fmt.Fprintf(w, "Denied! You have entered the wrong password for user: %s.", username)
 		} else {
 			sessionID := newSessionID()
 
-			sessions[sessionID] = &userInfo
+			sessions[sessionID] = userPtr
 
 			http.SetCookie(w, &http.Cookie{
 				Name:     "sessionCookie",
@@ -113,7 +114,12 @@ func login(w http.ResponseWriter, r *http.Request) {
 				HttpOnly: true,
 			})
 
-			w.Header().Set("HX-Redirect", "/schedule")
+			if userPtr.AdminStatus == false {
+				w.Header().Set("HX-Redirect", "/schedule")
+			} else {
+				w.Header().Set("HX-Redirect", "/approval")
+			}
+
 			w.WriteHeader(http.StatusOK)
 		}
 	}
@@ -169,7 +175,6 @@ func schedule(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
-
 }
 
 func submitSchedule(w http.ResponseWriter, r *http.Request) {
@@ -224,6 +229,46 @@ func submitSchedule(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("HX-Trigger", "pending-approval")
 		fmt.Fprintf(w, "Pending Approval! You schedule has been sent to your manager for review and approval. You will not be able to make edits until your request is approved or denied.")
+	}
+}
+
+func approval(w http.ResponseWriter, r *http.Request) {
+	user, err := getUserFromSession(r)
+
+	if err != nil {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	if user.AdminStatus != true {
+		http.Redirect(w, r, "/schedule", http.StatusSeeOther)
+		return
+	}
+
+	pages := []string{
+		"./templates/base.html",
+		"./templates/approval.html",
+	}
+
+	templateSet, err := template.ParseFiles(pages...)
+
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	data := struct {
+		Users map[string]*userInfo
+	}{
+		Users: users,
+	}
+
+	err = templateSet.ExecuteTemplate(w, "base", data)
+
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
 

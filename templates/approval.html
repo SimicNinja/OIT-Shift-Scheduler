@@ -1,0 +1,33 @@
+{{define "title"}}Admin Approvals{{end}}
+
+{{define "main"}}
+    <h1>Admin Approval Page</h1>
+
+    <table id = "Employees">
+        <tr>
+            <th>Username</th>
+            <th>Submittal Status</th>
+            <th></th>
+        </tr>
+        {{range $key, $user := .Users}}
+            <tr>
+                <td>{{$user.Username}}</td>
+                <td>
+                    {{if $user.Schedule}}
+                        Submitted
+                    {{else}}
+                        Not Submitted
+                    {{end}}
+                </td>
+                <td>
+                    {{if $user.Schedule}}
+                        Has a schedule
+                    {{end}}
+                </td>
+            </tr>
+        {{end}}
+    </table>
+{{end}}
+
+{{define "script"}}
+{{end}}
