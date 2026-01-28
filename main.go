@@ -88,7 +88,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		if !ok {
 			fmt.Fprintf(w, "Denied! User: %s does not exist.", username)
 		} else if secret != password {
-			fmt.Fprintf(w, "Denied! You have entered the wrong password for user: %s.", username)
+			fmt.Fprintf (w, "Denied! You have entered the wrong password for user: %s.", username)
 		} else {
 			w.Header().Set("HX-Redirect", "/schedule")
 			w.WriteHeader(http.StatusOK)
