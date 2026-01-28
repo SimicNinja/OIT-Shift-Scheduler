@@ -72,6 +72,13 @@ function toggleCell(cell)
 	}
 }
 
+// Disables submit button once a schedule has been successfully submitted
+document.body.addEventListener("pending-approval", e => {
+	const btn = document.getElementById("submitBtn");
+	btn.disabled = true;
+	btn.textContent = "Submitted";
+})
+
 // Parses through selectedCells to create list of shifts to send to server.
 function buildSchedulePayload()
 {

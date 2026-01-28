@@ -183,6 +183,7 @@ func submitSchedule(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Denied! You cannot work more than 40 in a week. Fix your schedule and resubmit.")
 		return
 	} else {
-		fmt.Fprintf(w, "Accepted! You schedule has been sent to your manager for review and approval.")
+		w.Header().Set("HX-Trigger", "pending-approval")
+		fmt.Fprintf(w, "Pending Approval! You schedule has been sent to your manager for review and approval.")
 	}
 }
