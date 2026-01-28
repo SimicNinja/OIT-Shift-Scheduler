@@ -173,9 +173,16 @@ func schedule(w http.ResponseWriter, r *http.Request) {
 }
 
 func submitSchedule(w http.ResponseWriter, r *http.Request) {
+	user, err := getUserFromSession(r)
+
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	var wrapper ScheduleWrapper
 
-	err := json.NewDecoder(r.Body).Decode(&wrapper)
+	err = json.NewDecoder(r.Body).Decode(&wrapper)
 	if err != nil {
 		fmt.Println("Decode error:", err)
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
@@ -213,6 +220,8 @@ func submitSchedule(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Denied! You cannot work more than 40 in a week. Fix your schedule and resubmit.")
 		return
 	} else {
+		user.Schedule = &schedule
+
 		w.Header().Set("HX-Trigger", "pending-approval")
 		fmt.Fprintf(w, "Pending Approval! You schedule has been sent to your manager for review and approval. You will not be able to make edits until your request is approved or denied.")
 	}
