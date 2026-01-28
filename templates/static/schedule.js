@@ -11,6 +11,19 @@ const displayedTotals = [
 	document.getElementById("FridayTotal")
 ];
 
+// Checks if the server passed a schedule that already exists.
+document.addEventListener("DOMContentLoaded", e => {
+	if(!window.preloadedSchedule) {
+		return
+	} else {
+		window.preloadedSchedule.Shifts.forEach(shift => {
+			selectShift(shift);
+		});
+
+		updateTotals();
+	}
+});
+
 // Button lister to toggle between Select & Deselect mode
 selectBtn.addEventListener('click', e => {
 	if(selectBtn.textContent === "Select Mode")
@@ -23,7 +36,7 @@ selectBtn.addEventListener('click', e => {
 		isSelecting = true;
 		selectBtn.textContent = "Select Mode";
 	}
-})
+});
 
 // Mouse listeners for schedule selection
 document.addEventListener("mousedown", e => {
@@ -50,7 +63,7 @@ document.addEventListener("mouseup", e => {
 });
 
 document.addEventListener("mouseover", e => {
-	if (isDragging && e.target.classList.contains("minuteSlot")) {
+	if(isDragging && e.target.classList.contains("minuteSlot")) {
 		toggleCell(e.target);
 	}
 });
@@ -125,7 +138,7 @@ function buildSchedulePayload()
 	return {Shifts: shifts};
 }
 
-// Helper Function for buildSchedulePayload that aggregates selected timeSlot cells that are continuous.
+// Helper function for buildSchedulePayload that aggregates selected timeSlot cells that are continuous.
 function makeShift(day, startMinutes, endMinutes)
 {
 	const startHour = Math.floor(startMinutes /60);
@@ -143,7 +156,28 @@ function makeShift(day, startMinutes, endMinutes)
   	};
 }
 
-// Daily & Weekly Total Calculation and update
+// Helper function for displaying a preexisting schedule from the server
+function selectShift(shift)
+{
+	const [startHour, startMin] = shift.Start.split(":").map(Number);
+	const [endHour, endMin] = shift.End.split(":").map(Number);
+
+	const start = startHour * 60 + startMin;
+	const end = endHour * 60 + endMin;
+
+	document.querySelectorAll(`.minuteSlot[day = "${shift.Day}"]`).forEach(slot => {
+		const hour = parseInt(slot.getAttribute("hour"));
+		const minute = parseInt(slot.getAttribute("hour"));
+		const time = hour * 60 + minute;
+
+		if (time >= start && time < end)
+		{
+			slot.classList.add("selected");
+		}
+	});
+}
+
+// Daily & Weekly Total Calculation and Update
 function addToTotals(cell)
 {
 	if(!cell.classList.contains("calculated"))
@@ -203,5 +237,5 @@ function getHours(minuteCount)
 
 function getMinutes(minuteCount)
 {
-		return (minuteCount % 6) * 10;
+	return (minuteCount % 6) * 10;
 }

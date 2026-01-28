@@ -44,7 +44,24 @@ type userInfo struct {
 }
 
 // User Database Mock
-var users = map[string]*userInfo{"student1": {"student1", "BYUStudent", false, nil}, "admin1": {"admin1", "JoeBelnap", true, nil}}
+var users = map[string]*userInfo{
+	"student1": {"student1", "BYU1", false, nil},
+	"admin1":   {"admin1", "joe", true, nil},
+	"student2": {
+		Username:    "student2",
+		Password:    "BYU2",
+		AdminStatus: false,
+		Schedule: &Schedule{
+			Shifts: []Shift{
+				{Day: "Monday", Start: "08:00", End: "12:00", Minutes: 240},
+				{Day: "Tuesday", Start: "08:00", End: "12:00", Minutes: 240},
+				{Day: "Wednesday", Start: "08:00", End: "12:00", Minutes: 240},
+				{Day: "Thursday", Start: "08:00", End: "12:00", Minutes: 240},
+				{Day: "Friday", Start: "08:00", End: "12:00", Minutes: 240},
+			},
+		},
+	},
+}
 
 // Tracks/maps browser sessions to users.
 var sessions = map[string]*userInfo{}
@@ -138,7 +155,9 @@ func schedule(w http.ResponseWriter, r *http.Request) {
 		"./templates/schedule.html",
 	}
 
-	templateSet, err := template.ParseFiles(pages...)
+	templateSet, err := template.New("base").Funcs(template.FuncMap{
+		"toJson": toJSON,
+	}).ParseFiles(pages...)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -292,4 +311,9 @@ func getUserFromSession(r *http.Request) (*userInfo, error) {
 	}
 
 	return user, nil
+}
+
+func toJSON(v interface{}) template.JS {
+	b, _ := json.Marshal(v)
+	return template.JS(b)
 }
