@@ -1,7 +1,7 @@
 {{define "title"}}Schedule{{end}}
 
 {{define "main"}}
-	<h1>Select Your Desired Schedule</h1>
+	<h1>Welcome {{.User.Username}}! Select Your Desired Schedule</h1>
 
 
 	<button id = "selectBtn">Select Mode</button>
@@ -9,20 +9,20 @@
 	<table class = "week">
 		<tr>
 			<th id = "dayColumn">Day</th>
-			{{range .Hours}}
+			{{range .Week.Hours}}
 				<th class = "hourColumn">{{.Label}}</th>
 			{{end}}
 			<th id = "totalColumn">Totals</th>
 		</tr>
-		{{range .Days}}
+		{{range .Week.Days}}
 			{{$day := .}}
 			<tr>
 				<td class = "daySlot">{{.}}</td>
-				{{range $.Hours}}
+				{{range $.Week.Hours}}
 					{{$hour := .Value24}}
 					<td>
 						<div class = "hourSlot">
-						{{range $.Minutes}}
+						{{range $.Week.Minutes}}
 							<div class = "minuteSlot" day = "{{$day}}" hour = "{{$hour}}" minute = "{{.}}">
 								{{printf ":%02d" .}}
 							</div>

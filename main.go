@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -43,6 +45,9 @@ type userInfo struct {
 
 // User Database Mock
 var users = map[string]userInfo{"student1": {"student1", "BYUStudent", false, nil}, "admin1": {"admin1", "JoeBelnap", true, nil}}
+
+// Tracks/maps browser sessions to users.
+var sessions = map[string]*userInfo{}
 
 func main() {
 	// Servemux is the same as a React Browser Router
@@ -97,6 +102,17 @@ func login(w http.ResponseWriter, r *http.Request) {
 		} else if userInfo.Password != password {
 			fmt.Fprintf(w, "Denied! You have entered the wrong password for user: %s.", username)
 		} else {
+			sessionID := newSessionID()
+
+			sessions[sessionID] = &userInfo
+
+			http.SetCookie(w, &http.Cookie{
+				Name:     "sessionCookie",
+				Value:    sessionID,
+				Path:     "/",
+				HttpOnly: true,
+			})
+
 			w.Header().Set("HX-Redirect", "/schedule")
 			w.WriteHeader(http.StatusOK)
 		}
@@ -104,33 +120,47 @@ func login(w http.ResponseWriter, r *http.Request) {
 }
 
 func schedule(w http.ResponseWriter, r *http.Request) {
+	user, err := getUserFromSession(r)
+
+	if err != nil {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	pages := []string{
 		"./templates/base.html",
 		"./templates/schedule.html",
 	}
 
 	templateSet, err := template.ParseFiles(pages...)
-	data := WeekData{
-		Days: []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"},
-		Hours: []Hour{
-			{8, "8am"},
-			{9, "9am"},
-			{10, "10am"},
-			{11, "11am"},
-			{12, "12pm"},
-			{13, "1pm"},
-			{14, "2pm"},
-			{15, "3pm"},
-			{16, "4pm"},
-			{17, "5pm"},
-		},
-		Minutes: []int{0, 10, 20, 30, 40, 50},
-	}
 
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
+	}
+
+	data := struct {
+		Week WeekData
+		User *userInfo
+	}{
+		Week: WeekData{
+			Days: []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"},
+			Hours: []Hour{
+				{8, "8am"},
+				{9, "9am"},
+				{10, "10am"},
+				{11, "11am"},
+				{12, "12pm"},
+				{13, "1pm"},
+				{14, "2pm"},
+				{15, "3pm"},
+				{16, "4pm"},
+				{17, "5pm"},
+			},
+			Minutes: []int{0, 10, 20, 30, 40, 50},
+		},
+		User: user,
 	}
 
 	err = templateSet.ExecuteTemplate(w, "base", data)
@@ -186,4 +216,26 @@ func submitSchedule(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("HX-Trigger", "pending-approval")
 		fmt.Fprintf(w, "Pending Approval! You schedule has been sent to your manager for review and approval. You will not be able to make edits until your request is approved or denied.")
 	}
+}
+
+func newSessionID() string {
+	b := make([]byte, 16)
+	rand.Read(b)
+	return hex.EncodeToString(b)
+}
+
+func getUserFromSession(r *http.Request) (*userInfo, error) {
+	c, err := r.Cookie("sessionCookie")
+
+	if err != nil {
+		return nil, err
+	}
+
+	user, ok := sessions[c.Value]
+
+	if !ok {
+		return nil, fmt.Errorf("Session not found!")
+	}
+
+	return user, nil
 }
