@@ -32,6 +32,7 @@ type Shift struct {
 type Schedule struct {
 	Shifts         []Shift `json:"Shifts"`
 	ApprovalStatus *bool   `json:"Approved"` // nil = pending
+	Comments       string  `json:"Comments"`
 }
 
 type ScheduleWrapper struct {
@@ -322,11 +323,49 @@ func scheduleReview(w http.ResponseWriter, r *http.Request) {
 }
 
 func adminApprove(w http.ResponseWriter, r *http.Request) {
+	username := r.PathValue("username")
+	user, ok := users[username]
+	if !ok {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
 
+	approved := true
+	comments := r.FormValue("comments")
+
+	if user.Schedule != nil {
+		user.Schedule.ApprovalStatus = &approved
+		user.Schedule.Comments = comments
+	}
+
+	fmt.Fprintf(w, `
+        <h3>Schedule Approved</h3>
+        <p>%s's schedule has been approved.</p>
+        <p><strong>Comments:</strong> %s</p>
+    `, username, comments)
 }
 
 func adminDeny(w http.ResponseWriter, r *http.Request) {
+	username := r.PathValue("username")
+	user, ok := users[username]
+	if !ok {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
 
+	approved := false
+	comments := r.FormValue("comments")
+
+	if user.Schedule != nil {
+		user.Schedule.ApprovalStatus = &approved
+		user.Schedule.Comments = comments
+	}
+
+	fmt.Fprintf(w, `
+        <h3>Schedule Denied</h3>
+        <p>%s's schedule has been denied.</p>
+        <p><strong>Comments:</strong> %s</p>
+    `, username, comments)
 }
 
 // Helper Functions
