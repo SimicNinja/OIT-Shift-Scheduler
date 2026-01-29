@@ -195,9 +195,9 @@ func studentView(w http.ResponseWriter, r *http.Request) {
 			Minutes: minutesRef,
 		},
 		User:     user,
-		ReadOnly: user.Schedule != nil && user.Schedule.ApprovalStatus == nil,
+		ReadOnly: user.Schedule != nil && (user.Schedule.ApprovalStatus == nil || *user.Schedule.ApprovalStatus),
 		Status:   deriveStatus(user),
-		Comments: deriveComments(user).
+		Comments: deriveComments(user),
 	}
 
 	err = templateSet.ExecuteTemplate(w, "base", data)
