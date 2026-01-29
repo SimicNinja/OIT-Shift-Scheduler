@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
@@ -93,12 +94,12 @@ func main() {
 	// Route Declarations
 	mux.HandleFunc("GET /", login)
 	mux.HandleFunc("POST /login", login)
-	mux.HandleFunc("GET /schedule", schedule)
-	mux.HandleFunc("POST /submit", submitSchedule)
-	mux.HandleFunc("GET /approval", approval)
-	mux.HandleFunc("GET /admin/schedule/{username}", adminViewSchedule)
-	mux.HandleFunc("POST /admin/approve/{username}", adminApprove)
-	mux.HandleFunc("POST /admin/deny/{username}", adminDeny)
+	mux.HandleFunc("GET /schedule", requireLogin(schedule))
+	mux.HandleFunc("POST /submit", requireLogin(submitSchedule))
+	mux.HandleFunc("GET /approval", requireAdminStatus(approval))
+	mux.HandleFunc("GET /admin/schedule/{username}", requireAdminStatus(adminViewSchedule))
+	mux.HandleFunc("POST /admin/approve/{username}", requireAdminStatus(adminApprove))
+	mux.HandleFunc("POST /admin/deny/{username}", requireAdminStatus(adminDeny))
 
 	// Start server at http://localhost:4444
 	log.Print("Starting Server on port 4444")
@@ -163,13 +164,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 }
 
 func schedule(w http.ResponseWriter, r *http.Request) {
-	user, err := getUserFromSession(r)
-
-	if err != nil {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-
+	user := r.Context().Value("user").(*userInfo)
 	pages := []string{
 		"./templates/base.html",
 		"./templates/schedule.html",
@@ -208,16 +203,11 @@ func schedule(w http.ResponseWriter, r *http.Request) {
 }
 
 func submitSchedule(w http.ResponseWriter, r *http.Request) {
-	user, err := getUserFromSession(r)
-
-	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	user := r.Context().Value("user").(*userInfo)
 
 	var wrapper ScheduleWrapper
 
-	err = json.NewDecoder(r.Body).Decode(&wrapper)
+	err := json.NewDecoder(r.Body).Decode(&wrapper)
 	if err != nil {
 		fmt.Println("Decode error:", err)
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
@@ -263,18 +253,6 @@ func submitSchedule(w http.ResponseWriter, r *http.Request) {
 }
 
 func approval(w http.ResponseWriter, r *http.Request) {
-	user, err := getUserFromSession(r)
-
-	if err != nil {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-
-	if user.AdminStatus != true {
-		http.Redirect(w, r, "/schedule", http.StatusSeeOther)
-		return
-	}
-
 	pages := []string{
 		"./templates/base.html",
 		"./templates/approval.html",
@@ -303,13 +281,6 @@ func approval(w http.ResponseWriter, r *http.Request) {
 }
 
 func adminViewSchedule(w http.ResponseWriter, r *http.Request) {
-	admin, err := getUserFromSession(r)
-
-	if err != nil || !admin.AdminStatus {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-
 	username := r.PathValue("username")
 	user, ok := users[username]
 	if !ok {
@@ -358,6 +329,33 @@ func adminDeny(w http.ResponseWriter, r *http.Request) {
 }
 
 // Helper Functions
+func requireLogin(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user, err := getUserFromSession(r)
+
+		if err != nil {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "user", user)
+		next(w, r.WithContext(ctx))
+	}
+}
+
+func requireAdminStatus(next http.HandlerFunc) http.HandlerFunc {
+	return requireLogin(func(w http.ResponseWriter, r *http.Request) {
+		user := r.Context().Value("user").(*userInfo)
+
+		if !user.AdminStatus {
+			http.Redirect(w, r, "/schedule", http.StatusSeeOther)
+			return
+		}
+
+		next(w, r)
+	})
+}
+
 func getUserFromSession(r *http.Request) (*userInfo, error) {
 	c, err := r.Cookie("sessionCookie")
 
