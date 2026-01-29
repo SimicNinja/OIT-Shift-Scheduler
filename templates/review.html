@@ -1,0 +1,37 @@
+{{define "review"}}
+	<h2>Reviewing {{.User.Username}}'s Schedule</h2>
+	
+	{{template "schedule" .}}
+
+	<h3>Comments (optional)</h3>
+	<textarea id = "adminComments" name = "comments"></textarea>
+
+	<br>
+
+	<button
+		hx-post = "/admin/approve/{{.User.Username}}"
+		hx-vals = 'js:{"comments": document.getElementById("adminComments").value}'
+		hx-target = "#scheduleReviewer"
+		hx-swap = "innerHTML">
+		Approve
+	</button>
+
+	<button
+		hx-post = "/admin/deny/{{.User.Username}}"
+		hx-vals = 'js:{"comments": document.getElementById("adminComments").value}'
+		hx-target = "#scheduleReviewer"
+		hx-swap = "innerHTML">
+		Deny
+	</button>
+
+	<script hx-on = "load">
+		window.preloadedSchedule = {{if .User.Schedule}}
+			{{.User.Schedule | toJson}}
+		{{else}}
+			{"Shifts": []}
+		{{end}};
+		window.readOnlyMode = {{.ReadOnly}};
+	</script>
+
+	<script src = "/static/schedule.js"></script>
+{{end}}

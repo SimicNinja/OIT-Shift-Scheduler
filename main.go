@@ -94,10 +94,10 @@ func main() {
 	// Route Declarations
 	mux.HandleFunc("GET /", login)
 	mux.HandleFunc("POST /login", login)
-	mux.HandleFunc("GET /schedule", requireLogin(schedule))
-	mux.HandleFunc("POST /submit", requireLogin(submitSchedule))
-	mux.HandleFunc("GET /approval", requireAdminStatus(approval))
-	mux.HandleFunc("GET /admin/schedule/{username}", requireAdminStatus(adminViewSchedule))
+	mux.HandleFunc("GET /schedule", requireLogin(studentView))
+	mux.HandleFunc("POST /schedule", requireLogin(submitSchedule))
+	mux.HandleFunc("GET /admin", requireAdminStatus(adminView))
+	mux.HandleFunc("GET /admin/review/{username}", requireAdminStatus(scheduleReview))
 	mux.HandleFunc("POST /admin/approve/{username}", requireAdminStatus(adminApprove))
 	mux.HandleFunc("POST /admin/deny/{username}", requireAdminStatus(adminDeny))
 
@@ -155,7 +155,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 			if userPtr.AdminStatus == false {
 				w.Header().Set("HX-Redirect", "/schedule")
 			} else {
-				w.Header().Set("HX-Redirect", "/approval")
+				w.Header().Set("HX-Redirect", "/admin")
 			}
 
 			w.WriteHeader(http.StatusOK)
@@ -163,10 +163,11 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func schedule(w http.ResponseWriter, r *http.Request) {
+func studentView(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*userInfo)
 	pages := []string{
 		"./templates/base.html",
+		"./templates/studentView.html",
 		"./templates/schedule.html",
 	}
 
@@ -252,10 +253,10 @@ func submitSchedule(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func approval(w http.ResponseWriter, r *http.Request) {
+func adminView(w http.ResponseWriter, r *http.Request) {
 	pages := []string{
 		"./templates/base.html",
-		"./templates/approval.html",
+		"./templates/adminView.html",
 	}
 
 	templateSet, err := template.ParseFiles(pages...)
@@ -280,7 +281,7 @@ func approval(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func adminViewSchedule(w http.ResponseWriter, r *http.Request) {
+func scheduleReview(w http.ResponseWriter, r *http.Request) {
 	username := r.PathValue("username")
 	user, ok := users[username]
 	if !ok {
@@ -289,11 +290,11 @@ func adminViewSchedule(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pages := []string{
-		"./templates/base.html",
+		"./templates/review.html",
 		"./templates/schedule.html",
 	}
 
-	templateSet, err := template.New("base").Funcs(template.FuncMap{
+	templateSet, err := template.New("review").Funcs(template.FuncMap{
 		"toJson": toJSON,
 	}).ParseFiles(pages...)
 
@@ -317,7 +318,7 @@ func adminViewSchedule(w http.ResponseWriter, r *http.Request) {
 		ReadOnly: true,
 	}
 
-	templateSet.ExecuteTemplate(w, "base", data)
+	templateSet.ExecuteTemplate(w, "review", data)
 }
 
 func adminApprove(w http.ResponseWriter, r *http.Request) {

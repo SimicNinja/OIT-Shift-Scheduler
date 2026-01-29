@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", initializeSchedulePage);
 
 // Checks if the server passed a schedule that already exists for admin use.
 document.body.addEventListener("htmx:afterSwap", (e) => {
-    if(e.target.id === "scheduleViewer")
+    if(e.target.id === "scheduleReviewer")
 	{
         initializeSchedulePage();
     }

@@ -1,0 +1,43 @@
+{{define "title"}}Schedule{{end}}
+
+
+{{define "main"}}
+    {{if .ReadOnly}}
+		<h1>Viewing {{.User.Username}}'s Schedule</h1>	
+	{{else}}
+		<h1>Welcome {{.User.Username}}! Select Your Desired Schedule</h1>
+	{{end}}
+
+	{{if not .ReadOnly}}
+		<button id = "selectBtn">Select Mode</button>
+	{{end}}
+
+    {{template "schedule" .}}
+
+    {{if not .ReadOnly}}
+		<button 
+			id = "submitBtn"
+			hx-post = "/schedule" 
+			hx-trigger = "click" 
+			hx-target = "#submitStatus"
+			hx-ext = "json-enc"
+			hx-vals = 'js:{"Schedule": buildSchedulePayload()}'>
+			Submit Schedule
+		</button>
+	{{end}}
+
+	<div id = "submitStatus"></div>
+{{end}}
+
+{{define "script"}}
+	<script>
+		window.preloadedSchedule = {{if .User.Schedule}}
+			{{.User.Schedule | toJson}}
+		{{else}}
+			{"Shifts": []}
+		{{end}};
+		window.readOnlyMode = {{.ReadOnly}};
+	</script>
+
+	<script src = "/static/schedule.js"></script>
+{{end}}

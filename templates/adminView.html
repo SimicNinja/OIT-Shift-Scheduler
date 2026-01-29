@@ -1,0 +1,39 @@
+{{define "title"}}Admin View{{end}}
+
+{{define "main"}}
+	<h1>Admin Page</h1>
+
+	<table id = "Employees">
+		<tr>
+			<th>Username</th>
+			<th>Submittal Status</th>
+			<th></th>
+		</tr>
+		{{range $key, $user := .Users}}
+			<tr>
+				<td>{{$user.Username}}</td>
+				<td>
+					{{if $user.Schedule}}
+						Submitted
+					{{else}}
+						Not Submitted
+					{{end}}
+				</td>
+				<td>
+					{{if $user.Schedule}}
+						<button hx-get = "/admin/review/{{$user.Username}}"
+							hx-target = "#scheduleReviewer"
+							hx-swap = "innerHTML">
+							Review Schedule
+						</button>
+					{{end}}
+				</td>
+			</tr>
+		{{end}}
+	</table>
+
+	<div id = "scheduleReviewer"></div>
+{{end}}
+
+{{define "script"}}
+{{end}}
