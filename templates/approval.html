@@ -1,32 +1,38 @@
 {{define "title"}}Admin Approvals{{end}}
 
 {{define "main"}}
-    <h1>Admin Approval Page</h1>
+	<h1>Admin Approval Page</h1>
 
-    <table id = "Employees">
-        <tr>
-            <th>Username</th>
-            <th>Submittal Status</th>
-            <th></th>
-        </tr>
-        {{range $key, $user := .Users}}
-            <tr>
-                <td>{{$user.Username}}</td>
-                <td>
-                    {{if $user.Schedule}}
-                        Submitted
-                    {{else}}
-                        Not Submitted
-                    {{end}}
-                </td>
-                <td>
-                    {{if $user.Schedule}}
-                        Has a schedule
-                    {{end}}
-                </td>
-            </tr>
-        {{end}}
-    </table>
+	<table id = "Employees">
+		<tr>
+			<th>Username</th>
+			<th>Submittal Status</th>
+			<th></th>
+		</tr>
+		{{range $key, $user := .Users}}
+			<tr>
+				<td>{{$user.Username}}</td>
+				<td>
+					{{if $user.Schedule}}
+						Submitted
+					{{else}}
+						Not Submitted
+					{{end}}
+				</td>
+				<td>
+					{{if $user.Schedule}}
+						<button hx-get = "/admin/schedule/{{$user.Username}}"
+							hx-target = "#scheduleViewer"
+							hx-swap = "innerHTML">
+							View Schedule
+						</button>
+					{{end}}
+				</td>
+			</tr>
+		{{end}}
+	</table>
+
+	<div id = "scheduleViewer"></div>
 {{end}}
 
 {{define "script"}}

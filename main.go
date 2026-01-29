@@ -66,6 +66,21 @@ var users = map[string]*userInfo{
 // Tracks/maps browser sessions to users.
 var sessions = map[string]*userInfo{}
 
+var daysRef = []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}
+var hoursRef = []Hour{
+	{8, "8am"},
+	{9, "9am"},
+	{10, "10am"},
+	{11, "11am"},
+	{12, "12pm"},
+	{13, "1pm"},
+	{14, "2pm"},
+	{15, "3pm"},
+	{16, "4pm"},
+	{17, "5pm"},
+}
+var minutesRef = []int{0, 10, 20, 30, 40, 50}
+
 func main() {
 	// Servemux is the same as a React Browser Router
 	mux := http.NewServeMux()
@@ -79,6 +94,7 @@ func main() {
 	mux.HandleFunc("GET /schedule", schedule)
 	mux.HandleFunc("POST /submit", submitSchedule)
 	mux.HandleFunc("GET /approval", approval)
+	mux.HandleFunc("GET /admin/schedule/{username}", adminViewSchedule)
 
 	// Start server at http://localhost:4444
 	log.Print("Starting Server on port 4444")
@@ -166,26 +182,17 @@ func schedule(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
-		Week WeekData
-		User *userInfo
+		Week     WeekData
+		User     *userInfo
+		ReadOnly bool
 	}{
 		Week: WeekData{
-			Days: []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"},
-			Hours: []Hour{
-				{8, "8am"},
-				{9, "9am"},
-				{10, "10am"},
-				{11, "11am"},
-				{12, "12pm"},
-				{13, "1pm"},
-				{14, "2pm"},
-				{15, "3pm"},
-				{16, "4pm"},
-				{17, "5pm"},
-			},
-			Minutes: []int{0, 10, 20, 30, 40, 50},
+			Days:    daysRef,
+			Hours:   hoursRef,
+			Minutes: minutesRef,
 		},
-		User: user,
+		User:     user,
+		ReadOnly: false,
 	}
 
 	err = templateSet.ExecuteTemplate(w, "base", data)
@@ -289,6 +296,53 @@ func approval(w http.ResponseWriter, r *http.Request) {
 		log.Print(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
+}
+
+func adminViewSchedule(w http.ResponseWriter, r *http.Request) {
+	admin, err := getUserFromSession(r)
+
+	if err != nil || !admin.AdminStatus {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	username := r.PathValue("username")
+	user, ok := users[username]
+	if !ok {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	pages := []string{
+		"./templates/base.html",
+		"./templates/schedule.html",
+	}
+
+	templateSet, err := template.New("base").Funcs(template.FuncMap{
+		"toJson": toJSON,
+	}).ParseFiles(pages...)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	data := struct {
+		Week     WeekData
+		User     *userInfo
+		ReadOnly bool
+	}{
+		Week: WeekData{
+			Days:    daysRef,
+			Hours:   hoursRef,
+			Minutes: minutesRef,
+		},
+		User:     user,
+		ReadOnly: true,
+	}
+
+	templateSet.ExecuteTemplate(w, "base", data)
 }
 
 func newSessionID() string {

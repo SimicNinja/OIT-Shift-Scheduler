@@ -1,10 +1,15 @@
 {{define "title"}}Schedule{{end}}
 
 {{define "main"}}
-	<h1>Welcome {{.User.Username}}! Select Your Desired Schedule</h1>
+	{{if .ReadOnly}}
+		<h1>Viewing {{.User.Username}}'s Schedule</h1>	
+	{{else}}
+		<h1>Welcome {{.User.Username}}! Select Your Desired Schedule</h1>
+	{{end}}
 
-
-	<button id = "selectBtn">Select Mode</button>
+	{{if not .ReadOnly}}
+		<button id = "selectBtn">Select Mode</button>
+	{{end}}
 	
 	<table class = "week">
 		<tr>
@@ -37,15 +42,17 @@
 
 	<h2 id = "weekTotal">Weekly Total: </h2>
 	
-	<button 
-		id = "submitBtn"
-		hx-post = "/submit" 
-		hx-trigger = "click" 
-		hx-target = "#submitStatus"
-		hx-ext = "json-enc"
-		hx-vals = 'js:{"Schedule": buildSchedulePayload()}'>
-		Submit Schedule
-	</button>
+	{{if not .ReadOnly}}
+		<button 
+			id = "submitBtn"
+			hx-post = "/submit" 
+			hx-trigger = "click" 
+			hx-target = "#submitStatus"
+			hx-ext = "json-enc"
+			hx-vals = 'js:{"Schedule": buildSchedulePayload()}'>
+			Submit Schedule
+		</button>
+	{{end}}
 
 	<div id = "submitStatus"></div>
 {{end}}
@@ -57,6 +64,7 @@
 		{{else}}
 			{"Shifts": []}
 		{{end}};
+		window.readOnlyMode = {{.ReadOnly}};
 	</script>
 
 	<script src = "/static/schedule.js"></script>

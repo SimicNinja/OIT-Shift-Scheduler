@@ -11,32 +11,33 @@ const displayedTotals = [
 	document.getElementById("FridayTotal")
 ];
 
-// Checks if the server passed a schedule that already exists.
-document.addEventListener("DOMContentLoaded", e => {
-	if(!window.preloadedSchedule) {
-		return
-	} else {
-		window.preloadedSchedule.Shifts.forEach(shift => {
-			selectShift(shift);
-		});
+// Checks if the server passed a schedule that already exists for student use.
+document.addEventListener("DOMContentLoaded", initializeSchedulePage);
 
-		updateTotals();
-	}
+// Checks if the server passed a schedule that already exists for admin use.
+document.body.addEventListener("htmx:afterSwap", (e) => {
+    if(e.target.id === "scheduleViewer")
+	{
+        initializeSchedulePage();
+    }
 });
 
 // Button lister to toggle between Select & Deselect mode
-selectBtn.addEventListener('click', e => {
-	if(selectBtn.textContent === "Select Mode")
-	{
-		isSelecting = false;
-		selectBtn.textContent = "Deselect Mode";
-	}
-	else if(selectBtn.textContent === "Deselect Mode")
-	{
-		isSelecting = true;
-		selectBtn.textContent = "Select Mode";
-	}
-});
+if (selectBtn)
+{
+	selectBtn.addEventListener('click', e => {
+		if(selectBtn.textContent === "Select Mode")
+		{
+			isSelecting = false;
+			selectBtn.textContent = "Deselect Mode";
+		}
+		else if(selectBtn.textContent === "Deselect Mode")
+		{
+			isSelecting = true;
+			selectBtn.textContent = "Select Mode";
+		}
+	});
+}
 
 // Mouse listeners for schedule selection
 document.addEventListener("mousedown", e => {
@@ -165,17 +166,33 @@ function selectShift(shift)
 	const start = startHour * 60 + startMin;
 	const end = endHour * 60 + endMin;
 
-	document.querySelectorAll(`.minuteSlot[day = "${shift.Day}"]`).forEach(slot => {
-		const hour = parseInt(slot.getAttribute("hour"));
-		const minute = parseInt(slot.getAttribute("hour"));
+	document.querySelectorAll(`.minuteSlot[day = "${shift.Day}"]`).forEach(cell => {
+		const hour = parseInt(cell.getAttribute("hour"));
+		const minute = parseInt(cell.getAttribute("minute"));
 		const time = hour * 60 + minute;
 
 		if (time >= start && time < end)
 		{
-			slot.classList.add("selected");
+			toggleCell(cell)
 		}
 	});
 }
+
+// Helper function for page initialization
+function initializeSchedulePage() {
+    if(window.readOnlyMode)
+	{
+        document.querySelector(".week").style.pointerEvents = "none";
+    }
+
+    if(window.preloadedSchedule)
+	{
+        window.preloadedSchedule.Shifts.forEach(shift => {
+            selectShift(shift);
+        });
+    }
+}
+
 
 // Daily & Weekly Total Calculation and Update
 function addToTotals(cell)
