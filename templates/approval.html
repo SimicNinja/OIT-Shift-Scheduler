@@ -28,11 +28,32 @@
 						</button>
 					{{end}}
 				</td>
+				<td>
+					{{if $user.Schedule}}
+						<button hx-post = "/admin/approve/{{$user.Username}}"
+						hx-trigger = "click" 
+						hx-target = "#comments"
+						hx-swap = "innerHTML">
+							Approve
+						</button>
+					{{end}}
+				</td>
+				<td>
+					{{if $user.Schedule}}
+						<button hx-post = "/admin/deny/{{$user.Username}}"
+						hx-trigger = "click"
+						hx-target = "#comments"
+						hx-swap = "innerHTML">
+							Deny
+						</button>
+					{{end}}
+				</td>
 			</tr>
 		{{end}}
 	</table>
 
 	<div id = "scheduleViewer"></div>
+	<div id = "comments"></div>
 {{end}}
 
 {{define "script"}}

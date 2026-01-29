@@ -136,7 +136,7 @@ function buildSchedulePayload()
 		shifts.push(makeShift(day, start, prev));
 	});
 
-	return {Shifts: shifts};
+	return {Shifts: shifts, Approved: null};
 }
 
 // Helper function for buildSchedulePayload that aggregates selected timeSlot cells that are continuous.

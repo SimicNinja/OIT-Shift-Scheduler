@@ -29,7 +29,8 @@ type Shift struct {
 }
 
 type Schedule struct {
-	Shifts []Shift `json:"Shifts"`
+	Shifts         []Shift `json:"Shifts"`
+	ApprovalStatus *bool   `json:"Approved"` // nil = pending
 }
 
 type ScheduleWrapper struct {
@@ -59,6 +60,7 @@ var users = map[string]*userInfo{
 				{Day: "Thursday", Start: "08:00", End: "12:00", Minutes: 240},
 				{Day: "Friday", Start: "08:00", End: "12:00", Minutes: 240},
 			},
+			ApprovalStatus: nil,
 		},
 	},
 }
@@ -95,6 +97,8 @@ func main() {
 	mux.HandleFunc("POST /submit", submitSchedule)
 	mux.HandleFunc("GET /approval", approval)
 	mux.HandleFunc("GET /admin/schedule/{username}", adminViewSchedule)
+	mux.HandleFunc("POST /admin/approve/{username}", adminApprove)
+	mux.HandleFunc("POST /admin/deny/{username}", adminDeny)
 
 	// Start server at http://localhost:4444
 	log.Print("Starting Server on port 4444")
@@ -345,12 +349,15 @@ func adminViewSchedule(w http.ResponseWriter, r *http.Request) {
 	templateSet.ExecuteTemplate(w, "base", data)
 }
 
-func newSessionID() string {
-	b := make([]byte, 16)
-	rand.Read(b)
-	return hex.EncodeToString(b)
+func adminApprove(w http.ResponseWriter, r *http.Request) {
+
 }
 
+func adminDeny(w http.ResponseWriter, r *http.Request) {
+
+}
+
+// Helper Functions
 func getUserFromSession(r *http.Request) (*userInfo, error) {
 	c, err := r.Cookie("sessionCookie")
 
@@ -365,6 +372,12 @@ func getUserFromSession(r *http.Request) (*userInfo, error) {
 	}
 
 	return user, nil
+}
+
+func newSessionID() string {
+	b := make([]byte, 16)
+	rand.Read(b)
+	return hex.EncodeToString(b)
 }
 
 func toJSON(v interface{}) template.JS {
