@@ -87,7 +87,7 @@ function toggleCell(cell)
 }
 
 // Disables submit button once a schedule has been successfully submitted
-document.body.addEventListener("pending-approval", e => {
+document.body.addEventListener("pending-review", e => {
 	const btn = document.getElementById("submitBtn");
 	btn.disabled = true;
 	btn.textContent = "Submitted";

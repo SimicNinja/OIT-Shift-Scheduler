@@ -31,7 +31,7 @@ type Shift struct {
 
 type Schedule struct {
 	Shifts         []Shift `json:"Shifts"`
-	ApprovalStatus *bool   `json:"Approved"` // nil = pending
+	ApprovalStatus *bool   `json:"Approved"` // nil = Submitted & pending
 	Comments       string  `json:"Comments"`
 }
 
@@ -186,6 +186,8 @@ func studentView(w http.ResponseWriter, r *http.Request) {
 		Week     WeekData
 		User     *userInfo
 		ReadOnly bool
+		Status   string
+		Comments string
 	}{
 		Week: WeekData{
 			Days:    daysRef,
@@ -193,7 +195,9 @@ func studentView(w http.ResponseWriter, r *http.Request) {
 			Minutes: minutesRef,
 		},
 		User:     user,
-		ReadOnly: false,
+		ReadOnly: user.Schedule != nil && user.Schedule.ApprovalStatus == nil,
+		Status:   deriveStatus(user),
+		Comments: deriveComments(user).
 	}
 
 	err = templateSet.ExecuteTemplate(w, "base", data)
@@ -215,8 +219,6 @@ func submitSchedule(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
-
-	fmt.Printf("Decoded schedule: %+v\n", wrapper.Schedule)
 
 	schedule := wrapper.Schedule
 	dailyCount := map[string]int{"Monday": 0, "Tuesday": 0, "Wednesday": 0, "Thursday": 0, "Friday": 0}
@@ -249,8 +251,8 @@ func submitSchedule(w http.ResponseWriter, r *http.Request) {
 	} else {
 		user.Schedule = &schedule
 
-		w.Header().Set("HX-Trigger", "pending-approval")
-		fmt.Fprintf(w, "Pending Approval! You schedule has been sent to your manager for review and approval. You will not be able to make edits until your request is approved or denied.")
+		w.Header().Set("HX-Trigger", "pending-review")
+		fmt.Fprintf(w, "Pending Review! You schedule has been sent to your manager for review and approval. You will not be able to make edits until your request is approved or denied.")
 	}
 }
 
@@ -421,4 +423,24 @@ func newSessionID() string {
 func toJSON(v interface{}) template.JS {
 	b, _ := json.Marshal(v)
 	return template.JS(b)
+}
+
+func deriveStatus(user *userInfo) string {
+	if user.Schedule == nil {
+		return ""
+	}
+	if user.Schedule.ApprovalStatus == nil {
+		return "pending"
+	}
+	if *user.Schedule.ApprovalStatus {
+		return "approved"
+	}
+	return "denied"
+}
+
+func deriveComments(user *userInfo) string {
+	if user.Schedule == nil {
+		return ""
+	}
+	return user.Schedule.Comments
 }

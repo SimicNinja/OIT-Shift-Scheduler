@@ -2,7 +2,7 @@
 
 
 {{define "main"}}
-    {{if .ReadOnly}}
+	{{if .ReadOnly}}
 		<h1>Viewing {{.User.Username}}'s Schedule</h1>	
 	{{else}}
 		<h1>Welcome {{.User.Username}}! Select Your Desired Schedule</h1>
@@ -12,9 +12,9 @@
 		<button id = "selectBtn">Select Mode</button>
 	{{end}}
 
-    {{template "schedule" .}}
+	{{template "schedule" .}}
 
-    {{if not .ReadOnly}}
+	{{if not .ReadOnly}}
 		<button 
 			id = "submitBtn"
 			hx-post = "/schedule" 
@@ -26,7 +26,21 @@
 		</button>
 	{{end}}
 
-	<div id = "submitStatus"></div>
+	<div id = "submitStatus">
+		{{if eq .Status "approved"}}
+			<p>Your schedule has been approved!</p>
+			{{if .Comments}}
+				<p><strong>Manager Comments: </strong>{{.Comments}}</p>
+			{{end}}
+		{{else if eq .Status "pending"}}
+			<p>Your schedule is pending review.</p>
+		{{else if eq .Status "denied"}}
+			<p>Your schedule was denied. Please see the comments and adjust your schedule accordingly. You have any questions, please contact your manager.</p>
+			{{if .Comments}}
+				<p><strong>Manager Comments: </strong>{{.Comments}}</p>
+			{{end}}
+		{{end}}
+	</div>
 {{end}}
 
 {{define "script"}}
